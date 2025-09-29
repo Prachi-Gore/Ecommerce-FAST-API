@@ -1,0 +1,17 @@
+python -m venv venv
+
+venv\Scripts\activate
+
+pip install "fastapi[standard]" sqlalchemy[asyncio] aiomysql alembic python-decouple python-jose[cryptography] passlib[bcrypt] cryptography
+
+pip freeze > requirements.txt
+
+fastapi dev app/main.py
+
+alembic init -t async alembic  # is used when you want to set up Alembic (a database migrations tool, often used with SQLAlchemy) in a project that uses async SQLAlchemy.
+
+alembic revision --autogenerate -m "create table" # This creates the migration script
+
+alembic upgrade head # Apply the migration to the DB
+
+alembic stamp head
