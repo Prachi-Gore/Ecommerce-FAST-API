@@ -8,7 +8,7 @@ class User(Base):
 
     id:Mapped[int]=mapped_column(primary_key=True,autoincrement=True)
     email:Mapped[str]=mapped_column(String(255),unique=True,nullable=False)
-    hashed_password:Mapped[str]=mapped_column(String(255),nullable=False)
+    hashed_password:Mapped[str]=mapped_column(String(512),nullable=False)
     is_active:Mapped[bool]=mapped_column(Boolean,default=True)
     is_admin:Mapped[bool]=mapped_column(Boolean,default=False)
     is_verified:Mapped[bool]=mapped_column(Boolean,default=False) # if email is verified
@@ -24,7 +24,10 @@ class RefreshToken(Base):
     user_id:Mapped[int]=mapped_column(ForeignKey("users.id",ondelete="CASCADE")) # users is table name of User Model
     token:Mapped[str]=mapped_column(String(255),nullable=False)
     expires_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),nullable=False)
-    revoked: Mapped[bool]=mapped_column(Boolean,default=False) # to expire token manually
+    revoked: Mapped[bool]=mapped_column(Boolean,default=False) # to expire token manually (revoked means banned)
     created_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=lambda:datetime.now(timezone.utc))
 
     user:Mapped["User"]=relationship("User",back_populates="refresh_tokens") # back_populates value is one of the field in User Model
+     
+    def __repr__(self):
+        return f"{self.token}"
