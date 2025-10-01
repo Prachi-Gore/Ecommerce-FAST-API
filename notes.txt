@@ -14,4 +14,4 @@ alembic revision --autogenerate -m "create table" # This creates the migration s
 
 alembic upgrade head # Apply the migration to the DB
 
-alembic stamp head
+alembic stamp head # to point current/latet revision
