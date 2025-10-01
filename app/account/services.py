@@ -14,6 +14,7 @@ async def create_user(session:AsyncSession,user:UserCreate):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail='Email alredy registered')
     
     new_user=User(
+         **user.model_dump(exclude={"password","email"}),
         email=user.email,
         hashed_password=hash_password(user.password)
     )

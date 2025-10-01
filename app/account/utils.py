@@ -104,3 +104,11 @@ def create_email_verification_token(user_id:int):
     expire= datetime.now(timezone.utc)+timedelta(hours=EMAIL_VERIFICATION_TOKEN_TIME_HR)
     to_encode={"sub":str(user_id),"type":"verify_email","exp":expire} 
     return jwt.encode(to_encode,JWT_SECRETE_KEY,algorithm=JWT_ALGORITHM)   
+
+async def revoke_refresh_token(session:AsyncSession,token:str):
+    stmt=select(RefreshToken).where(RefreshToken.token==token)
+    result = await session.scalars(stmt)
+    db_refresh_token=result.first()
+    if db_refresh_token:
+        db_refresh_token.revoked=True
+        await session.commit()

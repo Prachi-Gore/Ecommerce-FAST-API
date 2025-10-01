@@ -3,9 +3,9 @@ from fastapi.responses import JSONResponse
 from app.account.schemas import UserCreate,UserOut,UserLogin
 from app.account.services import create_user,authenticate_user,email_verification_send
 from app.db.config import SessionDep
-from app.account.utils import create_tokens,verify_refresh_token,set_cookie
+from app.account.utils import create_tokens,verify_refresh_token,set_cookie,revoke_refresh_token
 from app.account.models import User
-from app.account.deps import get_current_user
+from app.account.deps import get_current_user,require_admin
 
 router=APIRouter()
 
@@ -50,3 +50,18 @@ async def refresh_token(session:SessionDep,request:Request):
 async def send_verification_email(user:User=Depends(get_current_user)):
     return await email_verification_send(user)
 
+@router.get('/admin')
+async def admin(user:User=Depends(require_admin)):
+    return {
+        "message":f"welcome Admin {user.email}"
+    }
+
+@router.post("/logout")
+async def logout(session:SessionDep,request:Request,user:User=Depends(get_current_user)):
+    refresh_token=request.cookies.get("refresh_token")
+    if refresh_token:
+       await revoke_refresh_token(session,refresh_token)
+    response=JSONResponse(content={"detail":"Logged out"})
+    response.delete_cookie("refresh_token")
+    response.delete_cookie("access_token")
+    return response
